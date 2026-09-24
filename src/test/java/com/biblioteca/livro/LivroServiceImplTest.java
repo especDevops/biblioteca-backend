@@ -6,6 +6,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,15 +30,17 @@ class LivroServiceImplTest {
                 "Clean Code",
                 "Praticas para codigo limpo",
                 "Robert C. Martin",
+                "Tecnologia",
                 2008
         );
-        Livro livro = new Livro(null, request.titulo(), request.descricao(), request.autor(), request.anoPublicacao());
-        Livro livroSalvo = new Livro(1L, request.titulo(), request.descricao(), request.autor(), request.anoPublicacao());
+        Livro livro = new Livro(null, request.titulo(), request.descricao(), request.autor(), request.genero(), request.anoPublicacao());
+        Livro livroSalvo = new Livro(1L, request.titulo(), request.descricao(), request.autor(), request.genero(), request.anoPublicacao());
         LivroCadastroResponse resposta = new LivroCadastroResponse(
                 1L,
                 request.titulo(),
                 request.descricao(),
                 request.autor(),
+                request.genero(),
                 request.anoPublicacao()
         );
 
@@ -50,5 +54,38 @@ class LivroServiceImplTest {
         verify(mapper).paraEntidade(request);
         verify(repository).save(livro);
         verify(mapper).paraResposta(livroSalvo);
+    }
+
+    @Test
+    void deveListarTodosOsLivros() {
+        Livro livro = new Livro(1L, "Clean Code", "Descricao", "Robert C. Martin", "Tecnologia", 2008);
+        LivroCadastroResponse resposta = new LivroCadastroResponse(
+                1L,
+                "Clean Code",
+                "Descricao",
+                "Robert C. Martin",
+                "Tecnologia",
+                2008
+        );
+        List<Livro> livros = List.of(livro);
+        List<LivroCadastroResponse> respostas = List.of(resposta);
+
+        when(repository.findAll()).thenReturn(livros);
+        when(mapper.paraListaResposta(livros)).thenReturn(respostas);
+
+        List<LivroCadastroResponse> resultado = service.listarTodos();
+
+        assertThat(resultado).isEqualTo(respostas);
+        verify(repository).findAll();
+        verify(mapper).paraListaResposta(livros);
+    }
+
+    @Test
+    void deveDeletarLivroPorId() {
+        Long id = 1L;
+
+        service.deletar(id);
+
+        verify(repository).deleteById(id);
     }
 }

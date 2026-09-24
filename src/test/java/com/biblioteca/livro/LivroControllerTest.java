@@ -8,6 +8,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +29,7 @@ class LivroControllerTest {
                 "Domain-Driven Design",
                 "Modelagem de dominios complexos",
                 "Eric Evans",
+                "Tecnologia",
                 2003
         );
         LivroCadastroResponse resposta = new LivroCadastroResponse(
@@ -34,6 +37,7 @@ class LivroControllerTest {
                 request.titulo(),
                 request.descricao(),
                 request.autor(),
+                request.genero(),
                 request.anoPublicacao()
         );
         when(service.criar(request)).thenReturn(resposta);
@@ -43,5 +47,34 @@ class LivroControllerTest {
         assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(resultado.getBody()).isEqualTo(resposta);
         verify(service).criar(request);
+    }
+
+    @Test
+    void deveRetornarListaDeLivrosComStatus200() {
+        LivroCadastroResponse resposta = new LivroCadastroResponse(
+                1L,
+                "Domain-Driven Design",
+                "Descricao",
+                "Eric Evans",
+                "Tecnologia",
+                2003
+        );
+        when(service.listarTodos()).thenReturn(List.of(resposta));
+
+        ResponseEntity<List<LivroCadastroResponse>> resultado = controller.listarTodos();
+
+        assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(resultado.getBody()).containsExactly(resposta);
+        verify(service).listarTodos();
+    }
+
+    @Test
+    void deveDeletarLivroERetornarStatus204() {
+        Long id = 1L;
+
+        ResponseEntity<Void> resultado = controller.deletar(id);
+
+        assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        verify(service).deletar(id);
     }
 }

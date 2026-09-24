@@ -6,10 +6,11 @@ import jakarta.validation.constraints.NotNull;
 public record LivroCadastroRequest(
         @NotBlank
         String titulo,
-        @NotBlank
         String descricao,
         @NotBlank
         String autor,
+        @NotBlank
+        String genero,
         @NotNull
         Integer anoPublicacao
 ) {

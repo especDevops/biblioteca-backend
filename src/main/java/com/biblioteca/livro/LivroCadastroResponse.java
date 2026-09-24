@@ -8,6 +8,7 @@ public record LivroCadastroResponse(
         String titulo,
         String descricao,
         String autor,
+        String genero,
         Integer anoPublicacao
 ) {
 }

@@ -22,6 +22,7 @@ public class Livro {
     @Lob
     private String descricao;
     private String autor;
+    private String genero;
 
     @Column(name = "ano_publicacao")
     private Integer anoPublicacao;
