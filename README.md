@@ -154,26 +154,42 @@ java -jar target/biblioteca-0.0.1-SNAPSHOT.jar
 
 ---
 
-### 3. Deploy com Docker (Opcional)
+### 3. Execução e Deploy com Docker 🐳
 
-Crie um arquivo `Dockerfile` na raiz do backend:
-```dockerfile
-FROM eclipse-temurin:25-jdk-alpine AS build
-WORKDIR /app
-COPY . .
-RUN ./mvnw clean package -DskipTests
+O projeto já conta com [`Dockerfile`](./Dockerfile) e [`.dockerignore`](./.dockerignore) configurados para build multi-stage de produção.
 
-FROM eclipse-temurin:25-jre-alpine
-WORKDIR /app
-COPY --from=build /app/target/biblioteca-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
-```
+#### Características da imagem:
+- **Build Stage**: Utiliza `eclipse-temurin:25-jdk-alpine` com cache inteligente de dependências do Maven Wrapper.
+- **Runtime Stage**: Imagem final enxuta baseada em `eclipse-temurin:25-jre-alpine`.
+- **Segurança**: Execução sob usuário dedicado não-root (`appuser:appgroup`).
+- **Porta padrão**: `8080`.
 
-Build e execução da imagem:
+#### 1. Construir a imagem Docker:
 ```bash
 docker build -t biblioteca-backend .
-docker run -d -p 8080:8080 --name backend-container biblioteca-backend
+```
+
+#### 2. Executar o container:
+- **Modo padrão (H2 em memória):**
+  ```bash
+  docker run -d -p 8080:8080 --name backend-container biblioteca-backend
+  ```
+
+- **Conectando a um banco PostgreSQL externo:**
+  ```bash
+  docker run -d -p 8080:8080 --name backend-container \
+    -e SPRING_DATASOURCE_URL="jdbc:postgresql://host.docker.internal:5432/biblioteca_db" \
+    -e SPRING_DATASOURCE_USERNAME="postgres" \
+    -e SPRING_DATASOURCE_PASSWORD="sua_senha_segura" \
+    -e SPRING_JPA_HIBERNATE_DDL_AUTO="validate" \
+    biblioteca-backend
+  ```
+
+#### 3. Comandos úteis:
+```bash
+docker logs -f backend-container     # Ver logs em tempo real
+docker stop backend-container        # Parar o container
+docker rm backend-container          # Remover o container
 ```
 
 ---
