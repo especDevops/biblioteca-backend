@@ -8,23 +8,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class LivroServiceImpl implements LivroService{
 
-    private static final List<LivroCadastroResponse> LIVROS = List.of(
-            new LivroCadastroResponse(
-                    1L,
-                    "JAVA",
-                    "Livro do Java",
-                    "Machado de Assis",
-                    1540
-            ),
-            new LivroCadastroResponse(
-                    2L,
-                    "Eng. Software",
-                    "???",
-                    "Marcus Miranda",
-                    1999
-            )
-    );
-
     private final LivroRepository repository;
     private final LivroMapper mapper;
 
@@ -44,13 +27,49 @@ public class LivroServiceImpl implements LivroService{
 
     @Override
     public List<LivroCadastroResponse> listarTodos() {
-        return LIVROS;
+        return repository.findAll().stream()
+                .map(mapper::paraResposta)
+                .toList();
     }
 
     @Override
     public Optional<LivroCadastroResponse> buscarPorId(Long id) {
-        return LIVROS.stream()
-                .filter(livro -> livro.id() == id)
-                .findFirst();
+        return repository.findById(id).map(mapper::paraResposta);
+    }
+
+    @Override
+    public Optional<LivroCadastroResponse> atualizar(Long id, LivroCadastroRequest request) {
+        return repository.findById(id).map(livro -> {
+            mapper.atualizarEntidade(request, livro);
+            return mapper.paraResposta(repository.save(livro));
+        });
+    }
+
+    @Override
+    public Optional<LivroCadastroResponse> atualizarParcialmente(Long id, LivroAtualizacaoRequest request) {
+        return repository.findById(id).map(livro -> {
+            if (request.titulo() != null) {
+                livro.setTitulo(request.titulo());
+            }
+            if (request.descricao() != null) {
+                livro.setDescricao(request.descricao());
+            }
+            if (request.autor() != null) {
+                livro.setAutor(request.autor());
+            }
+            if (request.anoPublicacao() != null) {
+                livro.setAnoPublicacao(request.anoPublicacao());
+            }
+            return mapper.paraResposta(repository.save(livro));
+        });
+    }
+
+    @Override
+    public boolean excluir(Long id) {
+        if (!repository.existsById(id)) {
+            return false;
+        }
+        repository.deleteById(id);
+        return true;
     }
 }

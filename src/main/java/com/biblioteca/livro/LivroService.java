@@ -10,4 +10,10 @@ public interface LivroService {
     List<LivroCadastroResponse> listarTodos();
 
     Optional<LivroCadastroResponse> buscarPorId(Long id);
+
+    Optional<LivroCadastroResponse> atualizar(Long id, LivroCadastroRequest request);
+
+    Optional<LivroCadastroResponse> atualizarParcialmente(Long id, LivroAtualizacaoRequest request);
+
+    boolean excluir(Long id);
 }
