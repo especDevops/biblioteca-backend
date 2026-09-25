@@ -246,3 +246,10 @@ Para que a aplicação suba automaticamente mesmo após reiniciar a máquina sem
    nssm start BibliotecaBackendService
    ```
 3. O serviço pode ser controlado pelo painel `services.msc` do Windows.
+
+---
+
+## 📘 Manual Operacional (Runbook)
+
+Para procedimentos de operação contínua, health checks, troubleshooting de incidentes e planos de contingência/rollback, consulte o [Runbook Operacional do Backend](./RUNBOOK.md).
+
