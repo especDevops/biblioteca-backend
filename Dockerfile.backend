@@ -1,0 +1,32 @@
+# ---- Stage 1: build ----
+# Ajuste este caminho se o backend estiver em outra pasta do repositório.
+FROM eclipse-temurin:21-jdk-alpine AS build
+WORKDIR /app
+
+# Copia só o wrapper e o pom primeiro -> aproveita cache de dependências
+COPY .mvn/ .mvn
+COPY mvnw pom.xml ./
+RUN chmod +x mvnw && ./mvnw dependency:go-offline -B
+
+# Só agora copia o código-fonte
+COPY src ./src
+RUN ./mvnw package -DskipTests -B
+
+# ---- Stage 2: runtime ----
+# Imagem final só tem o JRE + o jar, sem Maven/JDK/dependências de build
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+
+RUN addgroup -S spring && adduser -S spring -G spring
+
+COPY --from=build --chown=spring:spring /app/target/*.jar app.jar
+
+USER spring
+EXPOSE 8080
+
+# Depende do endpoint do Actuator - ver README (seção "Troubleshooting")
+# sobre a dependência spring-boot-starter-actuator no pom.xml
+HEALTHCHECK --interval=10s --timeout=3s --start-period=15s --retries=3 \
+    CMD wget -qO- http://localhost:8080/actuator/health | grep -q '"status":"UP"' || exit 1
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
