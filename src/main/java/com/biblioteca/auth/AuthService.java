@@ -53,9 +53,25 @@ public class AuthService {
     }
 
     public AuthResponse login(LoginRequest request) {
+
+        Usuario usuario = repository.findByEmail(request.email())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        System.out.println("Usuário encontrado: " + usuario.getEmail());
+        System.out.println("Senha armazenada: " + usuario.getSenha());
+
+        System.out.println(
+                "Senha confere: " +
+                        passwordEncoder.matches(request.senha(), usuario.getSenha())
+        );
+
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.senha()));
-        Usuario usuario = repository.findByEmail(authentication.getName()).orElseThrow();
+                new UsernamePasswordAuthenticationToken(
+                        request.email(),
+                        request.senha()
+                )
+        );
+
         return respostaComToken(usuario);
     }
 
