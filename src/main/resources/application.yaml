@@ -14,3 +14,8 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:FEÇD58D4531F5827E82374S5WD51Ç72D}
+    expiration-seconds: 3600

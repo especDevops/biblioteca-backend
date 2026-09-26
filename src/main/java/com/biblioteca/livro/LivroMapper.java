@@ -1,7 +1,7 @@
 package com.biblioteca.livro;
 
-import java.util.List;
 import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface LivroMapper {
@@ -10,5 +10,5 @@ public interface LivroMapper {
 
     LivroCadastroResponse paraResposta(Livro livro);
 
-    List<LivroCadastroResponse> paraListaResposta(List<Livro> livros);
+    void atualizarEntidade(LivroCadastroRequest request, @MappingTarget Livro livro);
 }
