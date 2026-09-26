@@ -2,10 +2,14 @@ spring:
   application:
     name: biblioteca
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+#     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/biblioteca}
+#     username: ${SPRING_DATASOURCE_USERNAME:postgres}
+#     password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+#     driver-class-name: org.postgresql.Driver
+      url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+      driver-class-name: org.h2.Driver
+      username: sa
+      password:
   h2:
     console:
       enabled: true
@@ -14,8 +18,13 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: update
-
 app:
   jwt:
     secret: ${JWT_SECRET:FEÇD58D4531F5827E82374S5WD51Ç72D}
     expiration-seconds: 3600
+
+web:
+  origensPermitidas: ${WEB_ORIGENS_PERMITIDAS:http://localhost:5173}
+  metodosPermitidos: ${WEB_METODOS_PERMITIDOS:*}
+  credenciaisPermitidas: ${WEB_CREDENCIAIS_PERMITIDAS:true}
+  cabecalhosExpostos: ${WEB_CABECALHOS_EXPOSTOS:Content-Disposition}
