@@ -6,7 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record WebProps(
         String origensPermitidas,
         String metodosPermitidos,
-        boolean permitirCredenciais,
+        boolean credenciaisPermitidas,
         String cabecalhosExpostos
 ) {
 }

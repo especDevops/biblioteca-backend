@@ -15,7 +15,7 @@ app:
     expiration-seconds: 3600
 
 web:
-  origensPermitidas: ${WEB_ORIGENS_PERMITIDAS:http://localhost:5173}
-  metodosPermitidos: ${WEB_METODOS_PERMITIDOS:*}
+  origensPermitidas: ${WEB_ORIGENS_PERMITIDAS:http://localhost:5173,http://127.0.0.1:5173}
+  metodosPermitidos: ${WEB_METODOS_PERMITIDOS:GET,POST,PUT,PATCH,DELETE,OPTIONS}
   credenciaisPermitidas: ${WEB_CREDENCIAIS_PERMITIDAS:true}
-  cabecalhosExpostos: ${WEB_CABECALHOS_EXPOSTOS:Content-Disposition}
+  cabecalhosExpostos: ${WEB_CABECALHOS_EXPOSTOS:Authorization,Content-Type,Content-Disposition}
