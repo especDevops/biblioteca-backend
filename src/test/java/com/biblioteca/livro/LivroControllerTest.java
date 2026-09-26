@@ -32,6 +32,7 @@ class LivroControllerTest {
                 "Tecnologia",
                 2003
         );
+
         LivroCadastroResponse resposta = new LivroCadastroResponse(
                 1L,
                 request.titulo(),
@@ -40,12 +41,17 @@ class LivroControllerTest {
                 request.genero(),
                 request.anoPublicacao()
         );
+
         when(service.criar(request)).thenReturn(resposta);
 
-        ResponseEntity<LivroCadastroResponse> resultado = controller.criar(request);
+        ResponseEntity<LivroCadastroResponse> resultado =
+                controller.criar(request);
 
-        assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(resultado.getBody()).isEqualTo(resposta);
+        assertThat(resultado.getStatusCode())
+                .isEqualTo(HttpStatus.CREATED);
+        assertThat(resultado.getBody())
+                .isEqualTo(resposta);
+
         verify(service).criar(request);
     }
 
@@ -59,12 +65,17 @@ class LivroControllerTest {
                 "Tecnologia",
                 2003
         );
+
         when(service.listarTodos()).thenReturn(List.of(resposta));
 
-        ResponseEntity<List<LivroCadastroResponse>> resultado = controller.listarTodos();
+        ResponseEntity<List<LivroCadastroResponse>> resultado =
+                controller.listarTodos();
 
-        assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(resultado.getBody()).containsExactly(resposta);
+        assertThat(resultado.getStatusCode())
+                .isEqualTo(HttpStatus.OK);
+        assertThat(resultado.getBody())
+                .containsExactly(resposta);
+
         verify(service).listarTodos();
     }
 
@@ -72,9 +83,14 @@ class LivroControllerTest {
     void deveDeletarLivroERetornarStatus204() {
         Long id = 1L;
 
+        // Correção: o mock precisa indicar que o livro foi excluído.
+        when(service.excluir(id)).thenReturn(true);
+
         ResponseEntity<Void> resultado = controller.excluir(id);
 
-        assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(resultado.getStatusCode())
+                .isEqualTo(HttpStatus.NO_CONTENT);
+
         verify(service).excluir(id);
     }
 }
