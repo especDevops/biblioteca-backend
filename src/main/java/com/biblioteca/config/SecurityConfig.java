@@ -33,7 +33,6 @@ public class SecurityConfig {
         return http
                 .cors(Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**", "/h2-console/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/livros/**").hasAnyRole("ADMIN", "PADRAO")
