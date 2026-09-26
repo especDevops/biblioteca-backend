@@ -71,21 +71,25 @@ class LivroServiceImplTest {
         List<LivroCadastroResponse> respostas = List.of(resposta);
 
         when(repository.findAll()).thenReturn(livros);
-        when(mapper.paraListaResposta(livros)).thenReturn(respostas);
+        when(mapper.paraResposta(livro)).thenReturn(resposta);
 
         List<LivroCadastroResponse> resultado = service.listarTodos();
 
         assertThat(resultado).isEqualTo(respostas);
         verify(repository).findAll();
-        verify(mapper).paraListaResposta(livros);
+        verify(mapper).paraResposta(livro);
     }
 
     @Test
     void deveDeletarLivroPorId() {
         Long id = 1L;
 
-        service.deletar(id);
+        when(repository.existsById(id)).thenReturn(true);
 
+        boolean resultado = service.excluir(id);
+
+        assertThat(resultado).isTrue();
+        verify(repository).existsById(id);
         verify(repository).deleteById(id);
     }
 }
