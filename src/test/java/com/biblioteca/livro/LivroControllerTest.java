@@ -72,9 +72,9 @@ class LivroControllerTest {
     void deveDeletarLivroERetornarStatus204() {
         Long id = 1L;
 
-        ResponseEntity<Void> resultado = controller.deletar(id);
+        ResponseEntity<Void> resultado = controller.excluir(id);
 
         assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        verify(service).deletar(id);
+        verify(service).excluir(id);
     }
 }
