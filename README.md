@@ -1,94 +1,138 @@
 # Biblioteca Backend API 📚
 
-API REST para gerenciamento de acervo da biblioteca virtual, desenvolvida com Spring Boot e Java moderno.
+API REST para gerenciamento do acervo de uma biblioteca, desenvolvida com Spring Boot, autenticação JWT e persistência em PostgreSQL.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Tecnologias
 
-- **Java:** 25 (LTS)
-- **Framework:** Spring Boot 4.1.1
-- **Persistência & ORM:** Spring Data JPA / Hibernate
-- **Banco de Dados:** H2 Database (em memória para desenvolvimento) e suporte a PostgreSQL
-- **Mapeamento & Utilitários:** MapStruct, Project Lombok
-- **Validação:** Jakarta Bean Validation (`@Valid`, `@NotBlank`, `@NotNull`)
-- **Testes:** JUnit 5, Mockito, Spring Boot Test
+- Java 21 no `pom.xml` (compatível com JDK 21+; a imagem Docker pode usar Temurin 25)
+- Spring Boot 4.1.1
+- Spring Web MVC
+- Spring Data JPA / Hibernate
+- PostgreSQL como banco principal em execução local/produção
+- Spring Security com OAuth2 Resource Server e JWT
+- MapStruct e Lombok
+- Bean Validation com Jakarta Validation
+- JUnit 5 + Spring Boot Test
 
 ---
 
 ## 📋 Pré-requisitos
 
-- **JDK 25 ou superior**:
-  > [!IMPORTANT]
-  > Este projeto utiliza recursos do Java moderno (como Records e novas diretivas de compilação) configurados para a versão 25 no `pom.xml`.
-  > Certifique-se de que a variável de ambiente `JAVA_HOME` esteja apontando para o JDK 25 antes de executar o Maven.
+- JDK 21 ou superior recomendado
+- Maven Wrapper incluído no projeto (`mvnw` / `mvnw.cmd`)
+- Banco PostgreSQL disponível, ou uso do perfil de testes com H2
 
-### Localização do JDK na sua máquina Windows:
-O JDK 25 está localizado em:
+> Importante: a configuração padrão em `src/main/resources/application.yaml` aponta para PostgreSQL em `localhost:5432`, não para H2. O H2 é usado no perfil de teste (`src/test/resources/application-test.properties`).
+
+### JDK local no Windows
+
+Exemplo padrão da máquina local:
+
 ```text
 C:\Users\nando\.jdk\jdk-25\jdk-25.0.2
 ```
 
 ---
 
-## 🚀 Passo a Passo para Execução (Desenvolvimento)
+## 🚀 Execução local
 
-### 1. Configurar o JAVA_HOME na sessão
+### 1. Preparar o ambiente Java
 
-#### Windows (PowerShell):
+#### Windows (PowerShell)
 ```powershell
 $env:JAVA_HOME = "C:\Users\nando\.jdk\jdk-25\jdk-25.0.2"
 $env:Path = "$env:JAVA_HOME\bin;" + $env:Path
 ```
 
-#### Windows (CMD):
+#### Windows (CMD)
 ```cmd
 set JAVA_HOME=C:\Users\nando\.jdk\jdk-25\jdk-25.0.2
 set PATH=%JAVA_HOME%\bin;%PATH%
 ```
 
-#### Linux / macOS:
+#### Linux / macOS
 ```bash
-export JAVA_HOME=/caminho/para/jdk-25
+export JAVA_HOME=/caminho/para/jdk-21-ou-25
 export PATH=$JAVA_HOME/bin:$PATH
 ```
 
-> [!TIP]
-> **Definir permanentemente no Windows:**  
-> Abra o PowerShell como Administrador ou de Usuário e execute:
-> ```powershell
-> [System.Environment]::SetEnvironmentVariable("JAVA_HOME", "C:\Users\nando\.jdk\jdk-25\jdk-25.0.2", "User")
-> ```
-
 ---
 
-### 2. Iniciar a Aplicação
+### 2. Iniciar a aplicação
 
-Execute o Maven Wrapper a partir da raiz da pasta `biblioteca-backend`:
+Na raiz do projeto:
 
-#### Windows:
+#### Windows
 ```powershell
 .\mvnw.cmd spring-boot:run
 ```
 
-#### Linux / macOS:
+#### Linux / macOS
 ```bash
 ./mvnw spring-boot:run
 ```
 
-A aplicação subirá na porta padrão **8080**: `http://localhost:8080`.
+A aplicação sobe em:
+
+```text
+http://localhost:8080
+```
 
 ---
 
-## 🔗 Endpoints da API & Console H2
+## 🔐 Autenticação e autorização
+
+O backend usa autenticação JWT e controle de acesso por perfis:
+
+- `ADMIN`
+- `PADRAO`
+
+Regras principais de segurança:
+
+- `/auth/**` → público
+- `/h2-console/**` → público (quando habilitado no perfil de teste)
+- `GET /livros/**` → permitido para `ADMIN` e `PADRAO`
+- `POST/PUT/PATCH/DELETE /livros/**` → permitido somente para `ADMIN`
+
+---
+
+## 🔗 Endpoints principais
 
 | Método | Endpoint | Descrição |
 | :--- | :--- | :--- |
-| `GET` | `/livros` | Lista todos os livros cadastrados |
-| `POST` | `/livros` | Cadastra um novo livro |
-| `DELETE` | `/livros/{id}` | Remove um livro pelo ID |
+| `POST` | `/auth/cadastro` | Cria um novo usuário |
+| `POST` | `/auth/login` | Autentica usuário e retorna JWT |
+| `GET` | `/livros` | Lista livros |
+| `GET` | `/livros/{id}` | Busca livro por ID |
+| `POST` | `/livros` | Cria livro |
+| `PUT` | `/livros/{id}` | Atualiza livro completo |
+| `PATCH` | `/livros/{id}` | Atualização parcial |
+| `DELETE` | `/livros/{id}` | Remove livro |
 
-### Exemplo de Payload para Cadastro (`POST /livros`):
+### Cadastro de usuário (`POST /auth/cadastro`)
+
+```json
+{
+  "nome": "Maria Silva",
+  "email": "maria@biblioteca.com",
+  "senha": "123456",
+  "perfil": "ADMIN"
+}
+```
+
+### Login (`POST /auth/login`)
+
+```json
+{
+  "email": "maria@biblioteca.com",
+  "senha": "123456"
+}
+```
+
+### Criação de livro (`POST /livros`)
+
 ```json
 {
   "titulo": "O Senhor dos Anéis",
@@ -99,157 +143,142 @@ A aplicação subirá na porta padrão **8080**: `http://localhost:8080`.
 }
 ```
 
-### Console do Banco H2:
-- **URL:** `http://localhost:8080/h2-console`
-- **JDBC URL:** `jdbc:h2:mem:testdb`
-- **User Name:** `sa`
-- **Password:** *(em branco)*
-
 ---
 
-## 🧪 Execução de Testes Automatizados
+## 🧪 Testes
 
-A suíte inclui testes unitários com Mockito e testes de integração com `@SpringBootTest`.
+Para executar todos os testes:
 
-Para rodar todos os testes:
 ```powershell
 .\mvnw.cmd test
 ```
 
-Para rodar uma classe específica de testes:
+Para rodar uma classe específica:
+
 ```powershell
 .\mvnw.cmd test -Dtest=LivroControllerTest
 ```
 
+O perfil de teste usa H2 em memória:
+
+```properties
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.username=sa
+spring.datasource.password=
+```
+
 ---
 
-## 📦 Build e Deploy (Produção)
+## 📦 Build e execução em produção
 
-### 1. Gerar o arquivo JAR executável
+### Gerar o JAR
 
 ```powershell
 .\mvnw.cmd clean package -DskipTests
 ```
-O pacote será gerado em: `target/biblioteca-0.0.1-SNAPSHOT.jar`.
 
----
+O JAR será gerado em:
 
-### 2. Executar o JAR em Produção
-
-Para rodar o arquivo JAR compilado:
-```powershell
-java -jar target/biblioteca-0.0.1-SNAPSHOT.jar
+```text
+target\biblioteca-0.0.1-SNAPSHOT.jar
 ```
 
-#### Conectando a um PostgreSQL em Produção:
-Você pode passar os parâmetros de conexão por variáveis de ambiente sem alterar o código:
+### Executar o JAR
+
 ```powershell
-$env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5432/biblioteca_db"
+java -jar target\biblioteca-0.0.1-SNAPSHOT.jar
+```
+
+### Configuração de banco em produção
+
+A aplicação usa PostgreSQL por padrão. Exemplo de configuração via variáveis de ambiente:
+
+```powershell
+$env:SPRING_DATASOURCE_URL = "jdbc:postgresql://localhost:5432/biblioteca"
 $env:SPRING_DATASOURCE_USERNAME = "postgres"
-$env:SPRING_DATASOURCE_PASSWORD = "sua_senha_segura"
-$env:SPRING_JPA_HIBERNATE_DDL_AUTO = "validate"
+$env:SPRING_DATASOURCE_PASSWORD = "postgres"
+$env:JWT_SECRET = "sua_chave_segura_aqui"
 
-java -jar target/biblioteca-0.0.1-SNAPSHOT.jar
+java -jar target\biblioteca-0.0.1-SNAPSHOT.jar
 ```
+
+Valores configurados na aplicação:
+
+- `SPRING_DATASOURCE_URL`: `jdbc:postgresql://localhost:5432/biblioteca`
+- `SPRING_DATASOURCE_USERNAME`: `postgres`
+- `SPRING_DATASOURCE_PASSWORD`: `postgres`
+- `JWT_SECRET`: `FEÇD58D4531F5827E82374S5WD51Ç72D` (valor padrão para ambiente local)
+- `WEB_ORIGENS_PERMITIDAS`: `http://localhost:5173`
 
 ---
 
-### 3. Execução e Deploy com Docker 🐳
+## 🐳 Docker
 
-O projeto já conta com [`Dockerfile`](./Dockerfile) e [`.dockerignore`](./.dockerignore) configurados para build multi-stage de produção.
+Há dois Dockerfiles na raiz do projeto:
 
-#### Características da imagem:
-- **Build Stage**: Utiliza `eclipse-temurin:25-jdk-alpine` com cache inteligente de dependências do Maven Wrapper.
-- **Runtime Stage**: Imagem final enxuta baseada em `eclipse-temurin:25-jre-alpine`.
-- **Segurança**: Execução sob usuário dedicado não-root (`appuser:appgroup`).
-- **Porta padrão**: `8080`.
+- `Dockerfile` — imagem baseada em Temurin 25
+- `Dockerfile.backend` — build alternativo com JDK/JRE 21
 
-#### 1. Construir a imagem Docker:
+### Construir a imagem principal
+
 ```bash
 docker build -t biblioteca-backend .
 ```
 
-#### 2. Executar o container:
-- **Modo padrão (H2 em memória):**
-  ```bash
-  docker run -d -p 8080:8080 --name backend-container biblioteca-backend
-  ```
+### Executar o container
 
-- **Conectando a um banco PostgreSQL externo:**
-  ```bash
-  docker run -d -p 8080:8080 --name backend-container \
-    -e SPRING_DATASOURCE_URL="jdbc:postgresql://host.docker.internal:5432/biblioteca_db" \
-    -e SPRING_DATASOURCE_USERNAME="postgres" \
-    -e SPRING_DATASOURCE_PASSWORD="sua_senha_segura" \
-    -e SPRING_JPA_HIBERNATE_DDL_AUTO="validate" \
-    biblioteca-backend
-  ```
-
-#### 3. Comandos úteis:
 ```bash
-docker logs -f backend-container     # Ver logs em tempo real
-docker stop backend-container        # Parar o container
-docker rm backend-container          # Remover o container
+docker run -d -p 8080:8080 --name biblioteca-backend biblioteca-backend
+```
+
+### Conectar a PostgreSQL externo
+
+```bash
+docker run -d -p 8080:8080 --name biblioteca-backend \
+  -e SPRING_DATASOURCE_URL="jdbc:postgresql://host.docker.internal:5432/biblioteca" \
+  -e SPRING_DATASOURCE_USERNAME="postgres" \
+  -e SPRING_DATASOURCE_PASSWORD="postgres" \
+  -e JWT_SECRET="sua_chave_segura" \
+  biblioteca-backend
+```
+
+### Comandos úteis
+
+```bash
+docker logs -f biblioteca-backend
+docker stop biblioteca-backend
+docker rm biblioteca-backend
 ```
 
 ---
 
-## ⚙️ Como Deixar Rodando na Máquina (Segundo Plano / Serviço)
+## ⚙️ Execução em segundo plano
 
-### Opção 1: Usando PM2 (Recomendado para Dev/Staging com Node.js instalado)
-O PM2 pode gerenciar o processo Java, reiniciar em caso de falha e iniciar automaticamente no boot do Windows:
+### Opção 1: PM2
 
-1. Instale o PM2 globalmente (se já possuir Node.js):
-   ```powershell
-   npm install -g pm2
-   ```
+```powershell
+npm install -g pm2
+pm2 start "java -jar target\biblioteca-0.0.1-SNAPSHOT.jar" --name "biblioteca-backend"
+```
 
-2. Inicie o JAR gerenciado pelo PM2:
-   ```powershell
-   pm2 start "java -jar target/biblioteca-0.0.1-SNAPSHOT.jar" --name "biblioteca-backend"
-   ```
+Comandos úteis:
 
-3. Comandos úteis:
-   ```powershell
-   pm2 status               # Verifica o status
-   pm2 logs biblioteca-backend # Visualiza os logs em tempo real
-   pm2 stop biblioteca-backend # Para a execução
-   pm2 restart biblioteca-backend # Reinicia o serviço
-   ```
+```powershell
+pm2 status
+pm2 logs biblioteca-backend
+pm2 restart biblioteca-backend
+pm2 stop biblioteca-backend
+```
 
----
+### Opção 2: PowerShell em background
 
-### Opção 2: PowerShell em Segundo Plano (Background Job)
-Inicie o processo desanexado do console:
 ```powershell
 Start-Process -FilePath "java" -ArgumentList "-jar", "target\biblioteca-0.0.1-SNAPSHOT.jar" -WindowStyle Hidden
 ```
 
-- Para verificar se está rodando:
-  ```powershell
-  Get-Process -Name "java"
-  ```
-- Para parar o processo:
-  ```powershell
-  Stop-Process -Name "java"
-  ```
-
 ---
 
-### Opção 3: Como Serviço do Windows (NSSM - Produção Local)
-Para que a aplicação suba automaticamente mesmo após reiniciar a máquina sem precisar de login:
+## 📘 Runbook
 
-1. Baixe o [NSSM](https://nssm.cc/) (Non-Sucking Service Manager).
-2. Abra o terminal como Administrador e instale o serviço:
-   ```powershell
-   nssm install BibliotecaBackendService "C:\Users\nando\.jdk\jdk-25\jdk-25.0.2\bin\java.exe" "-jar C:\Users\nando\GitHub\biblioteca-backend\target\biblioteca-0.0.1-SNAPSHOT.jar"
-   nssm start BibliotecaBackendService
-   ```
-3. O serviço pode ser controlado pelo painel `services.msc` do Windows.
-
----
-
-## 📘 Manual Operacional (Runbook)
-
-Para procedimentos de operação contínua, health checks, troubleshooting de incidentes e planos de contingência/rollback, consulte o [Runbook Operacional do Backend](./RUNBOOK.md).
+Para procedimentos operacionais, troubleshooting, verificações de saúde e rollback, consulte o [RUNBOOK.md](./RUNBOOK.md).
 
