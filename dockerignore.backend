@@ -10,3 +10,6 @@ target
 .DS_Store
 HELP.md
 README.md
+*.test.*
+setupTests.ts
+src/test/

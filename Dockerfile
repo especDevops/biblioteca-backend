@@ -13,7 +13,7 @@ COPY mvnw pom.xml ./
 RUN chmod +x ./mvnw && sed -i 's/\r$//' ./mvnw
 
 # Baixa as dependências do projeto para cache de camadas
-RUN ./mvnw dependency:go-offline -B || true
+RUN ./mvnw dependency:go-offline -B 
 
 # Copia o código-fonte da aplicação
 COPY src/ src/
@@ -39,6 +39,9 @@ USER appuser:appgroup
 
 # Expõe a porta padrão do Spring Boot
 EXPOSE 8080
+
+# Healthcheck da aplicação Spring Boot via Actuator
+HEALTHCHECK --interval=15s --timeout=5s --retries=5 --start-period=30s CMD wget -q -O /dev/null http://127.0.0.1:8080/actuator/health || exit 1
 
 # Inicializa a aplicação
 ENTRYPOINT ["java", "-jar", "app.jar"]
